@@ -12,6 +12,7 @@ object SitePreviewPlugin extends AutoPlugin {
     val previewSite = TaskKey[Unit]("previewSite", "Launches a jetty server that serves your generated site from the target directory")
     val previewAuto = TaskKey[Unit]("previewAuto", "Launches an automatic jetty server that serves your generated site from the target directory")
     val previewFixedPort = SettingKey[Option[Int]]("previewFixedPort") in previewSite
+    val previewFixedIp = SettingKey[Option[String]]("previewFixedIp") in previewSite
     val previewLaunchBrowser = SettingKey[Boolean]("previewLaunchBrowser") in previewSite
   }
   import SitePlugin.autoImport._
@@ -41,14 +42,16 @@ object SitePreviewPlugin extends AutoPlugin {
     },
     previewAuto := {
       val port = previewFixedPort.value getOrElse Port.any
+      val ip = previewFixedIp.value getOrElse "127.0.0.1"
       val browser = previewLaunchBrowser.value
 
-      Preview(port, (target in previewAuto).value, makeSite, Compat.genSources, state.value) run { server =>
+      Preview(ip, port, (target in previewAuto).value, makeSite, Compat.genSources, state.value) run { server =>
         if (browser)
           Browser open(server.portBindings.head.url)
       }
     },
     previewFixedPort := Some(4000),
+    previewFixedIp := Some("127.0.0.1"),
     previewLaunchBrowser := true,
     target in previewAuto := siteDirectory.value
   )

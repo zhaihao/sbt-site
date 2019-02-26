@@ -10,7 +10,7 @@ import java.io.OutputStream
 import collection.mutable.Map
 
 object Preview {
-  def apply(port: Int, base: File, genSite: TaskKey[File], genSources: State => Seq[File], state: State): Server = {
+  def apply(ip: String, port: Int, base: File, genSite: TaskKey[File], genSources: State => Seq[File], state: State): Server = {
     val rootFile = runTask(genSite, state)
     val rootSources = genSources(state)
 
@@ -37,7 +37,7 @@ object Preview {
         }
       }
     }
-    val http = unfiltered.jetty.Server.local(port)
+    val http = unfiltered.jetty.Server.http(port, ip)
     http.plan(plan).resources(new URL(rootFile.toURI.toURL, "."))
   }
 
